@@ -1,18 +1,4 @@
 
-html, body, main {
-	width: 100%;
-	height: 100%;
-	margin: 0;
-	padding: 0;
-}
-
-main {	/* mainにもposition指定が必要 scroolが消えないから */
-	position: absolute;
-	top: 0px;
-	left: 0;
-	z-index: 1;
-}
-
 div.introview-buttons-wrapper {
 	position: absolute;
 	top: 10%;
