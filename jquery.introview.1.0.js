@@ -33,9 +33,12 @@
 		 * 初期化処理
 		 */
 		Introview.prototype.initialize = function() {
+			this._$el = $(this.selector)
 			this._setDefaultSlideLefts();
 			this._setPageNo();
 			this._setPageLeft();
+			// DOM構造をセットアップ
+			this._setUpDom();
 			this.pageNo.current = 1;
 			// 最初の slide-noを取得する
 			this.pageNo.first = $(this.selector + '>section').first().attr('data-page-no');
@@ -51,6 +54,26 @@
 			// 方向コントロールの設定 <- PCでのデバッグ用
 			//this._setArrowControl();
 		};
+
+		Introview.prototype.show = function(){
+			this._$el.addClass( "show-step0" );
+			var that = this;
+			setTimeout(function(){
+				that._$el.addClass( "show-step1" );
+			},400);
+		}
+
+		Introview.prototype.hide = function(){
+			this._$el.removeClass( "show-step1" );
+			var that = this;
+			setTimeout(function(){
+				that._$el.removeClass( "show-step0" );
+			},400);
+		}
+		Introview.prototype.start = function(){
+			this._jumpToThePageNo( this.pageNo.first );
+			this.show();
+		}
 
 		/**
 		 * DefaultのslideLefts値を設定する
@@ -101,7 +124,7 @@
 					count++;
 				});
 			} else if(this.pageNo.finish) {
-				this.finishCallback();
+				this.finishCallback( this );
 			}
 		};
 
@@ -191,14 +214,18 @@
 			$(this.selector).append(elDiv);
 			$("div.introview-pointer-wrapper a").click(function() {
 				var selectedPageNo = $(this).attr('data-page-no');
-				var step = parseInt(selectedPageNo) - parseInt(that.pageNo.current);
-				if(step != 0) that._setCurrentPageNo(step);
-				var leftStep = step * 100 * -1;
-				that._appendSlideLeftValues(leftStep);
-				that._move();
-				that._setPointerActive(selectedPageNo);
+				that._jumpToThePageNo( selectedPageNo );
 			});
 		};
+
+		Introview.prototype._jumpToThePageNo = function(pageNo){
+			var step = parseInt(pageNo) - parseInt(this.pageNo.current);
+			if(step != 0) this._setCurrentPageNo(step);
+			var leftStep = step * 100 * -1;
+			this._appendSlideLeftValues(leftStep);
+			this._move();
+			this._setPointerActive(pageNo);
+		}
 
 		Introview.prototype._setSwipeControl = function() {
 			var that = this;
@@ -225,6 +252,11 @@
 			});
 		};
 
+		Introview.prototype._setUpDom = function(){
+			this._$el.addClass("introview-wrapper");
+			this._$el.find('section').css("transition" , "transform " +  (this.duration/1000) + "s " + "cubic-bezier(0.165, 0.84, 0.44, 1)");
+		};
+
 		Introview.prototype._setSkipControl = function() {
 			var that = this;
 			var elDiv = $('<div>').addClass('introview-skip-wrapper');
@@ -246,9 +278,10 @@
 			"finishCallback": function(){}
 		};
         var options=$.extend(defaults, config);
-		new Introview(defaults);
+		return new Introview(defaults);
 
 	};
 
 })(jQuery);
+
 

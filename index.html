@@ -64,11 +64,14 @@
 				"selector": "#introview",
 				"duration": 500,
 				"easizng": "easeOutQuart",
-				"finishCallback": function() {
+				"finishCallback": function( introview ) {
 					alert('Finished!');
+					introview.hide();
 				}
 			};
-			$('#introview').introview(settings);
+			$('#introview').introview(settings).start();
+
+
 		</script>
 	</body>
 </html>
