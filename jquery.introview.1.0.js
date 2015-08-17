@@ -82,7 +82,7 @@
 			var count = $(this.selector + '>section').length;
 			var val = 0;
 			for(var i=0;i<count; i++) {
-				var left = val.toString() + '%';
+				var left = (val).toString() + '%';
 				this.slideLefts.push(left);
 				val = parseInt(val) + 100;
 			}
@@ -95,7 +95,7 @@
 			var val = 0;
 			$(this.selector + '>section').each(function() {
 				var left = val.toString() + '%';
-				$(this).css('left', left);
+				$(this).css('transform', "translateX(" + left + ")");
 				val = parseInt(val) + 100;
 			});
 		};
@@ -120,7 +120,9 @@
 				var that = this;
 				$(this.selector + '>section').each(function() {
 					var props = { 'left': that.slideLefts[count] };
-					$(this).animate(props, that.duration, that.easing);
+					console.log(props);
+					$(this).css({ "transform": "translateX(" + props.left + ")" });
+					//$(this).animate(props, that.duration, that.easing);
 					count++;
 				});
 			} else if(this.pageNo.finish) {
@@ -135,7 +137,7 @@
 			if(!val) return false;
 			for(var i=0; i<this.slideLefts.length; i++) {
 				var newVal = parseInt(this.slideLefts[i]) + parseInt(val);
-				this.slideLefts[i] = newVal.toString() + '%';
+				this.slideLefts[i] = ( newVal).toString() + '%';
 			}
 		};
 
