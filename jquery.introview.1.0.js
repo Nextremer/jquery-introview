@@ -12,7 +12,7 @@
  */
 (function($){
 
-    $.fn.introview=function(config){
+	$.fn.introview=function(config){
 
 		function Introview(settings) {
 			this.slideLefts = [];	// ページのleft位置配列
@@ -23,22 +23,35 @@
 				"over": null,
 				"finish": null
 			};
+
+			if( settings.animation !== Introview.JQ_ANIMATE && settings.easing ){
+				console.warn("easing option is effective only when using jQuery#animate for animation");
+			}
+
 			this.selector = settings.selector || console.error('selector not specified');
 			this.duration = settings.duration || 500;
+			this.animation = settings.animation || Introview.JQ_ANIMATE;
 			this.easing = settings.easing || "easeOutQuart";
 			this.finishCallback = settings.finishCallback || function(){};
 			this.initialize();
+
 		}
+
+		// CONSTANTS
+		Object.defineProperty(Introview, "JQ_ANIMATE", { value: 'jqAnimate' });
+		Object.defineProperty(Introview, "CSS_ANIMATE", { value: 'cssAnimate' });
 
 		/**
 		 * 初期化処理
 		 */
 		Introview.prototype.initialize = function() {
-            $(this.selector).addClass('introview-wrapper');
+
+			this._$el = $(this.selector)
 			this._setDefaultSlideLefts();
 			this._setPageNo();
 			this._setPageLeft();
-            this._setInnerDiv();
+			// DOM構造をセットアップ
+			this._setUpDom();
 			this.pageNo.current = 1;
 			// 最初の slide-noを取得する
 			this.pageNo.first = $(this.selector + '>section').first().attr('data-page-no');
@@ -56,13 +69,46 @@
 		};
 
 		/**
+		 * Introview自体を[表示]状態にする
+		 */
+		Introview.prototype.show = function(){
+			this._$el.addClass( "show-step0" );
+			var that = this;
+			setTimeout(function(){
+				that._$el.addClass( "show-step1" );
+			},400);
+			return this;
+		}
+
+		/**
+		 * Introview自体を[非表示]状態にする
+		 */
+		Introview.prototype.hide = function(){
+			this._$el.removeClass( "show-step1" );
+			var that = this;
+			setTimeout(function(){
+				that._$el.removeClass( "show-step0" );
+			},400);
+			return this;
+		}
+
+		/**
+		 * Introviewを表示状態にして、最初のページを表示する
+		 */
+		Introview.prototype.start = function(){
+			this._jumpToThePageNo( this.pageNo.first );
+			this.show();
+			return this;
+		}
+
+		/**
 		 * DefaultのslideLefts値を設定する
 		 */
 		Introview.prototype._setDefaultSlideLefts = function() {
 			var count = $(this.selector + '>section').length;
 			var val = 0;
 			for(var i=0;i<count; i++) {
-				var left = val.toString() + '%';
+				var left = (val).toString() + '%';
 				this.slideLefts.push(left);
 				val = parseInt(val) + 100;
 			}
@@ -73,11 +119,24 @@
 		 */
 		Introview.prototype._setPageLeft = function() {
 			var val = 0;
+			var that = this;
 			$(this.selector + '>section').each(function() {
 				var left = val.toString() + '%';
-				$(this).css('left', left);
+				that._setLeft( $(this), left );
 				val = parseInt(val) + 100;
 			});
+		};
+
+
+		/**
+		 * 指定したjqオブジェクトの、left 値を指定する
+		 */
+		Introview.prototype._setLeft = function( $target,  val ){
+			if( this.animation === Introview.CSS_ANIMATE ){
+				this._setTranslateX($target, val );
+			}else{
+				$target.css('left', val);
+			}
 		};
 
 		/**
@@ -114,13 +173,25 @@
 				var that = this;
 				$(this.selector + '>section').each(function() {
 					var props = { 'left': that.slideLefts[count] };
-					$(this).animate(props, that.duration, that.easing);
+					that._animate( $(this), props );
 					count++;
 				});
 			} else if(this.pageNo.finish) {
-				this.finishCallback();
+				this.finishCallback( this );
 			}
 		};
+
+
+		/**
+		 * 指定したjqオブジェクトをアニメーションさせる
+		 */
+		Introview.prototype._animate = function( $target,  props ){
+			if( this.animation === Introview.CSS_ANIMATE ){
+				this._setTranslateX( $target, props.left );
+			}else{
+				$target.animate(props, this.duration, this.easing);
+			}
+		}
 
 		/**
 		 * Left値に任意の値を加算する
@@ -129,7 +200,7 @@
 			if(!val) return false;
 			for(var i=0; i<this.slideLefts.length; i++) {
 				var newVal = parseInt(this.slideLefts[i]) + parseInt(val);
-				this.slideLefts[i] = newVal.toString() + '%';
+				this.slideLefts[i] = ( newVal).toString() + '%';
 			}
 		};
 
@@ -208,37 +279,54 @@
 			$(this.selector).append(elDiv);
 			$("div.introview-pointer-wrapper a").click(function() {
 				var selectedPageNo = $(this).attr('data-page-no');
-				var step = parseInt(selectedPageNo) - parseInt(that.pageNo.current);
-				if(step != 0) that._setCurrentPageNo(step);
-				var leftStep = step * 100 * -1;
-				that._appendSlideLeftValues(leftStep);
-				that._move();
-				that._setPointerActive(selectedPageNo);
+				that._jumpToThePageNo( selectedPageNo );
 			});
 		};
+
+		Introview.prototype._jumpToThePageNo = function(pageNo){
+			var step = parseInt(pageNo) - parseInt(this.pageNo.current);
+			if(step != 0) this._setCurrentPageNo(step);
+			var leftStep = step * 100 * -1;
+			this._appendSlideLeftValues(leftStep);
+			this._move();
+			this._setPointerActive(pageNo);
+		}
 
 		Introview.prototype._setSwipeControl = function() {
 			var that = this;
 			$(this.selector).swipe( {	// Use jquery Touch Swipe Plugin
 				swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
-				  if(direction === 'right') {
-					that._setCurrentPageNo(-1);
-					if(that.pageNo.current >= that.pageNo.first && !that.pageNo.over) {
-						that._appendSlideLeftValues(100);
+					if(direction === 'right') {
+						that._setCurrentPageNo(-1);
+						if(that.pageNo.current >= that.pageNo.first && !that.pageNo.over) {
+							that._appendSlideLeftValues(100);
+						}
+						that._move();
+						that._setPointerActive(that.pageNo.current);
+					} else if(direction === 'left') {
+						that._setCurrentPageNo(1);
+						if(that.pageNo.current <=that.pageNo.last && !that.pageNo.over) {
+							that._appendSlideLeftValues(-100);
+						}
+						that._move();
+						that._setPointerActive(that.pageNo.current);
 					}
-					that._move();
-					that._setPointerActive(that.pageNo.current);
-				  } else if(direction === 'left') {
-					that._setCurrentPageNo(1);
-					if(that.pageNo.current <=that.pageNo.last && !that.pageNo.over) {
-						that._appendSlideLeftValues(-100);
-					}
-					that._move();
-					that._setPointerActive(that.pageNo.current);
-				  }
 				},
 				//Default is 75px, set to 0 for demo so any distance triggers swipe
-				 threshold:0
+				threshold:0
+			});
+		};
+
+		Introview.prototype._setUpDom = function(){
+			this._setInnerDiv();
+			this._$el.addClass("introview-wrapper");
+
+			var durationInSec = this.duration / 1000;
+			var easingText = "cubic-bezier(0.165, 0.84, 0.44, 1)";
+			this._$el.find('section').css({
+				"-webkit-transition" : "-webkit-transform " +  durationInSec + "s " + easingText,
+				"-moz-transition" : "-moz-transform " +  durationInSec + "s " + easingText,
+				"transition" : "transform " +  durationInSec + "s " + easingText,
 			});
 		};
 
@@ -256,16 +344,25 @@
 			});
 		};
 
+		Introview.prototype._setTranslateX = function( $target,  val ){
+			$target.css({
+				'-webkit-transform': "translateX(" + val + ")",
+				'-moz-transform': "translateX(" + val + ")",
+				'transform': "translateX(" + val + ")",
+			});
+		}
+
 		var defaults={
 			"selector": this.selector || null,
 			"duration": 500,
 			"easing": "easeOutQuart",
 			"finishCallback": function(){}
 		};
-        var options=$.extend(defaults, config);
-		new Introview(defaults);
+		var options=$.extend(defaults, config);
+		return new Introview(defaults);
 
 	};
 
 })(jQuery);
+
 

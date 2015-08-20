@@ -81,6 +81,15 @@ $('#introview').introview(options);
 **finishCallback**
 全てのページスライドが完了もしくはSkipされたときのコールバックを指定します。(default function(){})
 
+
+** animation **
+
+アニメーション方式を指定します( default 'jqAnimate' )。
+以下が設定可能です。
+
+| `jqAnimate` | アニメーションにjQueryのanimateメソッドを使います。 |
+| `cssAnimate` | アニメーションにCSSのtransiton/transformXを使います。パフォーマンスが`jqAnimate`よりも良い代わりに、`easing`オプションを指定できなくなります。 |
+
 # Lisense
 
 Dual licensed under the MIT or GPL Version 2 licenses.
