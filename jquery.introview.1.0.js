@@ -133,7 +133,7 @@
 		 */
 		Introview.prototype._setLeft = function( $target,  val ){
 			if( this.animation === Introview.CSS_ANIMATE ){
-				$target.css('transform', "translateX(" + val + ")");
+				this._setTranslateX($target, val );
 			}else{
 				$target.css('left', val);
 			}
@@ -187,7 +187,7 @@
 		 */
 		Introview.prototype._animate = function( $target,  props ){
 			if( this.animation === Introview.CSS_ANIMATE ){
-				$target.css({ "transform": "translateX(" + props.left + ")" });
+				this._setTranslateX( $target, props.left );
 			}else{
 				$target.animate(props, this.duration, this.easing);
 			}
@@ -343,6 +343,14 @@
 				that._move();
 			});
 		};
+
+		Introview.prototype._setTranslateX = function( $target,  val ){
+			$target.css({
+				'-webkit-transform': "translateX(" + val + ")",
+				'-moz-transform': "translateX(" + val + ")",
+				'transform': "translateX(" + val + ")",
+			});
+		}
 
 		var defaults={
 			"selector": this.selector || null,
