@@ -11,7 +11,7 @@
  */
 (function($){
 
-    $.fn.introview=function(config){
+	$.fn.introview=function(config){
 
 		function Introview(settings) {
 			this.slideLefts = [];	// ページのleft位置配列
@@ -22,12 +22,17 @@
 				"over": null,
 				"finish": null
 			};
+			this.animation = settings.animation || Introview.JQ_ANIMATE;
 			this.selector = settings.selector || console.error('selector not specified');
 			this.duration = settings.duration || 500;
 			this.easing = settings.easing || "easeOutQuart";
 			this.finishCallback = settings.finishCallback || function(){};
 			this.initialize();
 		}
+
+		// CONSTANTS
+		Object.defineProperty(Introview, "JQ_ANIMATE", { value: 'jqAnimate' });
+		Object.defineProperty(Introview, "CSS_ANIMATE", { value: 'cssAnimate' });
 
 		/**
 		 * 初期化処理
@@ -93,11 +98,24 @@
 		 */
 		Introview.prototype._setPageLeft = function() {
 			var val = 0;
+			var that = this;
 			$(this.selector + '>section').each(function() {
 				var left = val.toString() + '%';
-				$(this).css('transform', "translateX(" + left + ")");
+				that._setLeft( $(this), left );
 				val = parseInt(val) + 100;
 			});
+		};
+
+
+		/**
+		 * 指定したjqオブジェクトの、left 値を指定する
+		 */
+		Introview.prototype._setLeft = function( $target,  val ){
+			if( this.animation === Introview.CSS_ANIMATE ){
+				$target.css('transform', "translateX(" + val + ")");
+			}else{
+				$target.css('left', val);
+			}
 		};
 
 		/**
@@ -120,15 +138,25 @@
 				var that = this;
 				$(this.selector + '>section').each(function() {
 					var props = { 'left': that.slideLefts[count] };
-					console.log(props);
-					$(this).css({ "transform": "translateX(" + props.left + ")" });
-					//$(this).animate(props, that.duration, that.easing);
+					that._animate( $(this), props );
 					count++;
 				});
 			} else if(this.pageNo.finish) {
 				this.finishCallback( this );
 			}
 		};
+
+
+		/**
+		 * 指定したjqオブジェクトをアニメーションさせる
+		 */
+		Introview.prototype._animate = function( $target,  props ){
+			if( this.animation === Introview.CSS_ANIMATE ){
+				$target.css({ "transform": "translateX(" + props.left + ")" });
+			}else{
+				$target.animate(props, this.duration, this.easing);
+			}
+		}
 
 		/**
 		 * Left値に任意の値を加算する
@@ -233,24 +261,24 @@
 			var that = this;
 			$(this.selector).swipe( {	// Use jquery Touch Swipe Plugin
 				swipe:function(event, direction, distance, duration, fingerCount, fingerData) {
-				  if(direction === 'right') {
-					that._setCurrentPageNo(-1);
-					if(that.pageNo.current >= that.pageNo.first && !that.pageNo.over) {
-						that._appendSlideLeftValues(100);
+					if(direction === 'right') {
+						that._setCurrentPageNo(-1);
+						if(that.pageNo.current >= that.pageNo.first && !that.pageNo.over) {
+							that._appendSlideLeftValues(100);
+						}
+						that._move();
+						that._setPointerActive(that.pageNo.current);
+					} else if(direction === 'left') {
+						that._setCurrentPageNo(1);
+						if(that.pageNo.current <=that.pageNo.last && !that.pageNo.over) {
+							that._appendSlideLeftValues(-100);
+						}
+						that._move();
+						that._setPointerActive(that.pageNo.current);
 					}
-					that._move();
-					that._setPointerActive(that.pageNo.current);
-				  } else if(direction === 'left') {
-					that._setCurrentPageNo(1);
-					if(that.pageNo.current <=that.pageNo.last && !that.pageNo.over) {
-						that._appendSlideLeftValues(-100);
-					}
-					that._move();
-					that._setPointerActive(that.pageNo.current);
-				  }
 				},
 				//Default is 75px, set to 0 for demo so any distance triggers swipe
-				 threshold:0
+				threshold:0
 			});
 		};
 
@@ -279,7 +307,7 @@
 			"easing": "easeOutQuart",
 			"finishCallback": function(){}
 		};
-        var options=$.extend(defaults, config);
+		var options=$.extend(defaults, config);
 		return new Introview(defaults);
 
 	};
