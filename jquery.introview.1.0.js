@@ -77,6 +77,7 @@
 			setTimeout(function(){
 				that._$el.addClass( "show-step1" );
 			},400);
+			return this;
 		}
 
 		/**
@@ -88,6 +89,7 @@
 			setTimeout(function(){
 				that._$el.removeClass( "show-step0" );
 			},400);
+			return this;
 		}
 
 		/**
@@ -96,6 +98,7 @@
 		Introview.prototype.start = function(){
 			this._jumpToThePageNo( this.pageNo.first );
 			this.show();
+			return this;
 		}
 
 		/**
