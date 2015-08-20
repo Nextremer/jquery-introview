@@ -3,7 +3,8 @@
  * @version 1.0.0
  *
  * @author BathTimeFish http://www.github.com/bathtimefish
- * @see
+ * @author rockymanobi https://github.com/rockymanobi
+ * @see https://github.com/Nextremer/jquery-introview
  *
  * Copyright (c) 2015 BathTimeFish
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -33,9 +34,11 @@
 		 * 初期化処理
 		 */
 		Introview.prototype.initialize = function() {
+            $(this.selector).addClass('introview-wrapper');
 			this._setDefaultSlideLefts();
 			this._setPageNo();
 			this._setPageLeft();
+            this._setInnerDiv();
 			this.pageNo.current = 1;
 			// 最初の slide-noを取得する
 			this.pageNo.first = $(this.selector + '>section').first().attr('data-page-no');
@@ -87,6 +90,20 @@
 				count++;
 			});
 		};
+
+		/**
+		 * section要素にセンタリング用Divを追加する
+		 */
+		Introview.prototype._setInnerDiv = function() {
+			$(this.selector + '>section').each(function() {
+                var elDiv = $('<div>');
+                $(this).children().each(function() {
+                    elDiv.append($(this));
+                });
+                $(this).children().remove();
+                $(this).append(elDiv);
+            });
+        };
 
 		/**
 		 * ページを移動する
@@ -240,7 +257,7 @@
 		};
 
 		var defaults={
-			"selector": null,
+			"selector": this.selector || null,
 			"duration": 500,
 			"easing": "easeOutQuart",
 			"finishCallback": function(){}
