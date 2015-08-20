@@ -23,12 +23,18 @@
 				"over": null,
 				"finish": null
 			};
-			this.animation = settings.animation || Introview.JQ_ANIMATE;
+
+			if( settings.animation !== Introview.JQ_ANIMATE && settings.easing ){
+				console.warn("easing option is effective only when using jQuery#animate for animation");
+			}
+
 			this.selector = settings.selector || console.error('selector not specified');
 			this.duration = settings.duration || 500;
+			this.animation = settings.animation || Introview.JQ_ANIMATE;
 			this.easing = settings.easing || "easeOutQuart";
 			this.finishCallback = settings.finishCallback || function(){};
 			this.initialize();
+
 		}
 
 		// CONSTANTS
