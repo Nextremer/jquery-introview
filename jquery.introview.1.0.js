@@ -68,6 +68,9 @@
 			//this._setArrowControl();
 		};
 
+		/**
+		 * Introview自体を[表示]状態にする
+		 */
 		Introview.prototype.show = function(){
 			this._$el.addClass( "show-step0" );
 			var that = this;
@@ -76,6 +79,9 @@
 			},400);
 		}
 
+		/**
+		 * Introview自体を[非表示]状態にする
+		 */
 		Introview.prototype.hide = function(){
 			this._$el.removeClass( "show-step1" );
 			var that = this;
@@ -83,6 +89,10 @@
 				that._$el.removeClass( "show-step0" );
 			},400);
 		}
+
+		/**
+		 * Introviewを表示状態にして、最初のページを表示する
+		 */
 		Introview.prototype.start = function(){
 			this._jumpToThePageNo( this.pageNo.first );
 			this.show();
