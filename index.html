@@ -5,12 +5,12 @@
 		<title>jQuery introview Demo</title>
 		<link rel="stylesheet" href="./jquery.introview.css">
 		<style type="text/css">
-html, body, main {
-	width: 100%;
-	height: 100%;
-	margin: 0;
-	padding: 0;
-}
+			html, body, main {
+				width: 100%;
+				height: 100%;
+				margin: 0;
+				padding: 0;
+			}
 			main {	/* mainにもposition指定が必要 scroolが消えないから */
 				position: absolute;
 				top: 0px;
@@ -26,32 +26,23 @@ html, body, main {
 		<main role="main">
 		<p>Start!</p>
 		</main>
+
 		<!-- introview area -->
-		<div id="introview" class="introview-wrapper">
-			<section data-background-image="1.jpg" data-background-color="#eee">
-				<div>
-					<p>this is first</p>
-				</div>
+		<div id="introview">
+			<section>
+				<p>this is first</p>
 			</section>
-			<section data-background-image="2.jpg" data-background-color="#fee">
-				<div>
-					<p>this is second</p>
-				</div>
+			<section>
+				<p>this is second</p>
 			</section>
-			<section data-background-image="3.jpg" data-background-color="#efe">
-				<div>
-					<p>this is third</p>
-				</div>
+			<section>
+				<p>this is third</p>
 			</section>
-			<section data-background-image="4.jpg" data-background-color="#eef">
-				<div>
-					<p>this is forth</p>
-				</div>
+			<section>
+				<p>this is forth</p>
 			</section>
-			<section data-background-image="5.jpg" data-background-color="#ffe">
-				<div>
-					<p>this is fifth</p>
-				</div>
+			<section>
+				<p>this is fifth</p>
 			</section>
 		</div>
 
@@ -60,20 +51,16 @@ html, body, main {
 		<script src="./bower_components/jquery-touchswipe/jquery.touchSwipe.min.js"></script>
 		<script src="jquery.introview.1.0.js"></script>
 		<script>
-var settings = {
-	"selector": "#introview",
-	"duration": 500,
-	"easizng": "easeOutQuart",
-	"animation": "cssAnimate",
-	"finishCallback": function( introview ) {
-		alert('Finished!');
-		introview.hide();
-	}
-};
-$('#introview').introview(settings).start();
-
-
-
+			var settings = {
+				"duration": 500,
+				"easizng": "easeOutQuart",
+				"animation": "cssAnimate",
+				"finishCallback": function( introview ) {
+					alert('Finished!');
+					introview.hide();
+				}
+			};
+			$('#introview').introview(settings).start();
 		</script>
 	</body>
 </html>

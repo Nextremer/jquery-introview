@@ -3,7 +3,8 @@
  * @version 1.0.0
  *
  * @author BathTimeFish http://www.github.com/bathtimefish
- * @see
+ * @author rockymanobi https://github.com/rockymanobi
+ * @see https://github.com/Nextremer/jquery-introview
  *
  * Copyright (c) 2015 BathTimeFish
  * Dual licensed under the MIT or GPL Version 2 licenses.
@@ -38,6 +39,7 @@
 		 * 初期化処理
 		 */
 		Introview.prototype.initialize = function() {
+
 			this._$el = $(this.selector)
 			this._setDefaultSlideLefts();
 			this._setPageNo();
@@ -128,6 +130,20 @@
 				count++;
 			});
 		};
+
+		/**
+		 * section要素にセンタリング用Divを追加する
+		 */
+		Introview.prototype._setInnerDiv = function() {
+			$(this.selector + '>section').each(function() {
+                var elDiv = $('<div>');
+                $(this).children().each(function() {
+                    elDiv.append($(this));
+                });
+                $(this).children().remove();
+                $(this).append(elDiv);
+            });
+        };
 
 		/**
 		 * ページを移動する
@@ -283,8 +299,16 @@
 		};
 
 		Introview.prototype._setUpDom = function(){
+			this._setInnerDiv();
 			this._$el.addClass("introview-wrapper");
-			this._$el.find('section').css("transition" , "transform " +  (this.duration/1000) + "s " + "cubic-bezier(0.165, 0.84, 0.44, 1)");
+
+			var durationInSec = this.duration / 1000;
+			var easingText = "cubic-bezier(0.165, 0.84, 0.44, 1)";
+			this._$el.find('section').css({
+				"-webkit-transition" : "-webkit-transform " +  durationInSec + "s " + easingText,
+				"-moz-transition" : "-moz-transform " +  durationInSec + "s " + easingText,
+				"transition" : "transform " +  durationInSec + "s " + easingText,
+			});
 		};
 
 		Introview.prototype._setSkipControl = function() {
@@ -302,7 +326,7 @@
 		};
 
 		var defaults={
-			"selector": null,
+			"selector": this.selector || null,
 			"duration": 500,
 			"easing": "easeOutQuart",
 			"finishCallback": function(){}
