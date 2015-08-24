@@ -82,9 +82,9 @@ $('#introview').introview(options);
 全てのページスライドが完了もしくはSkipされたときのコールバックを指定します。(default function(){})
 
 
-** animation **
-
+**animation**
 アニメーション方式を指定します( default 'jqAnimate' )。
+
 以下が設定可能です。
 
 | `jqAnimate` | アニメーションにjQueryのanimateメソッドを使います。 |
