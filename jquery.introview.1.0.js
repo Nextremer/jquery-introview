@@ -28,6 +28,8 @@
 				console.warn("easing option is effective only when using jQuery#animate for animation");
 			}
 
+			this.noSkipButton = (settings.noSkipButton == void(0))? false : settings.noSkipButton;
+			this.finishWhenLastPageSwiped = (settings.finishWhenLastPageSwiped == void(0) )? true : settings.finishWhenLastPageSwiped;
 			this.selector = settings.selector || console.error('selector not specified');
 			this.duration = settings.duration || 500;
 			this.animation = settings.animation || Introview.JQ_ANIMATE;
@@ -98,6 +100,15 @@
 		Introview.prototype.start = function(){
 			this._jumpToThePageNo( this.pageNo.first );
 			this.show();
+			return this;
+		}
+
+		/**
+		 * Introviewを終了する
+		 */
+		Introview.prototype.finishIntroview = function(){
+      this.pageNo.finish = true;
+      this._move();
 			return this;
 		}
 
@@ -204,6 +215,10 @@
 			}
 		};
 
+    Introview.prototype._isOnLastPage = function(){
+      return this.pageNo.current >= this.pageNo.last;
+    }
+
 		/**
 		 * カレント位置情報をセットする
 		 */
@@ -304,6 +319,8 @@
 						that._move();
 						that._setPointerActive(that.pageNo.current);
 					} else if(direction === 'left') {
+            console.log(that.finishWhenLastPageSwiped); 
+            if( that._isOnLastPage() && !that.finishWhenLastPageSwiped ){ return }
 						that._setCurrentPageNo(1);
 						if(that.pageNo.current <=that.pageNo.last && !that.pageNo.over) {
 							that._appendSlideLeftValues(-100);
@@ -331,6 +348,7 @@
 		};
 
 		Introview.prototype._setSkipControl = function() {
+      if( this.noSkipButton ){ return; } 
 			var that = this;
 			var elDiv = $('<div>').addClass('introview-skip-wrapper');
 			var elItem = $('<div>').addClass('introview-skip-item');
@@ -339,8 +357,7 @@
 			elDiv.append(elItem);
 			$(this.selector).append(elDiv);
 			$('div.introview-skip-item>a').click(function() {
-				that.pageNo.finish = true;
-				that._move();
+        that.finishIntroview();
 			});
 		};
 
